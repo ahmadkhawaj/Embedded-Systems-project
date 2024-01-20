@@ -1,0 +1,26 @@
+main
+	__CC2DW
+		____DoICP
+	msDelay
+	ADC_init
+	ultrasonic
+		usDelay
+		word2double
+			NRM3232
+				RES032
+				SETFUN32
+				FIXSIGN32
+		Div_32x32_FP
+			SETFDZ32
+			RES032
+			SETFOV32
+			SETFUN32
+		double2word
+			SETIOV3224
+		Rotation90
+		msDelay
+		Rotation0
+	read_temp
+		Mul_16X16_U
+		Div_16X16_U
+interrupt

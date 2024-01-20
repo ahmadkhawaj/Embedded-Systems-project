@@ -1,0 +1,250 @@
+#line 1 "C:/Users/ahmad/OneDrive/Desktop/tesrrr/MyProject.c"
+unsigned char bit_0=1;
+unsigned char bit_1=1;
+unsigned char bit_2=1;
+unsigned char bit_3=1;
+unsigned char bit_4=1;
+unsigned int Dcntr=0;
+unsigned char temp;
+
+
+
+
+
+void delay_ms(unsigned int ms);
+void delay_us(unsigned int ms);
+void Rotation0();
+void Rotation90();
+void msDelay(unsigned int msCnt);
+void usDelay(unsigned int usCnt);
+void ultrasonic(void);
+
+
+
+
+
+void interrupt(void) {
+ if(INTCON&0x04) {
+ TMR0=248;
+ if ((PORTB & 0x01) != bit_0) {
+ if (!(PORTB & 0x01)) {
+
+ PORTC &= ~(1 << 0);
+ PORTC |= (1 << 5);
+ Dcntr--;
+ } else {
+
+ PORTC |= (1 << 0);
+ PORTC &= ~(1 << 5);
+ Dcntr++;
+ }
+ bit_0 = PORTB & 0x01;
+
+ }
+ if ((PORTB & 0x02) != bit_1) {
+ if (!(PORTB & 0x02)) {
+
+ PORTC &= ~(1 << 1);
+ PORTC |= (1 << 6);
+ Dcntr--;
+ } else {
+
+ PORTC |= (1 << 1);
+ PORTC &= ~(1 << 6);
+ Dcntr++;
+ }
+ bit_1 = PORTB & 0x02;
+
+ }
+ if ((PORTB & 0x04) != bit_2) {
+ if (!(PORTB & 0x04)) {
+
+ PORTC &= ~(1 << 2);
+ PORTC |= (1 << 7);
+ Dcntr--;
+ } else {
+
+ PORTC |= (1 << 2);
+ PORTC &= ~(1 << 7);
+ Dcntr++;
+ }
+ bit_2 = PORTB & 0x04;
+
+ }
+ if ((PORTB & 0x08) != bit_3) {
+ if (!(PORTB & 0x08)) {
+
+ PORTC &= ~(1 << 3);
+ PORTD |= (1 << 0);
+ Dcntr--;
+ } else {
+
+ PORTC |= (1 << 3);
+ PORTD &= ~(1 << 0);
+ Dcntr++;
+ }
+ bit_3 = PORTB & 0x08;
+
+ }
+ if ((PORTB & 0x10) != bit_4) {
+ if (!(PORTB & 0x10)) {
+
+ PORTC &= ~(1 << 4);
+ PORTD |= (1 << 1);
+ Dcntr--;
+ } else {
+
+ PORTC |= (1 << 4);
+ PORTD &= ~(1 << 1);
+ Dcntr++;
+ }
+ bit_4 = PORTB & 0x10;
+
+ }
+
+ INTCON = INTCON & 0xFB;
+ }
+}
+
+void ADC_init(void){
+ ADCON1=0xCE;
+ ADCON0= 0x41;
+}
+
+unsigned int read_temp(void){
+ unsigned int read;
+ ADCON0 = ADCON0 | 0x04;
+ while( ADCON0 & 0x04);
+ read=(ADRESH<<8)| ADRESL;
+ return (read*500)/1023;
+}
+
+
+
+
+void main()
+{
+TRISA=0XFB;
+TRISB=0X5F;
+TRISD=0X00;
+TRISC=0X00;
+PORTB=0X00;
+PORTA=0X00;
+PORTC=0X00;
+PORTD=0X00;
+TMR0=248;
+OPTION_REG = 0x07;
+INTCON=0xA0;
+T1CON = 0x10;
+msDelay(20);
+ADC_init();
+while(1)
+{
+ultrasonic();
+temp = read_temp();
+temp = temp + 1;
+msDelay(300);
+}
+}
+
+
+
+void msDelay(unsigned int msCnt)
+{
+ unsigned int ms=0;
+ unsigned int cc=0;
+ for(ms=0;ms<(msCnt);ms++)
+ {
+ for(cc=0;cc<155;cc++);
+ }
+}
+
+
+
+
+void usDelay(unsigned int usCnt)
+{
+ unsigned int us=0;
+
+ for(us=0;us<usCnt;us++)
+ {
+ asm NOP;
+ asm NOP;
+ }
+}
+
+void ultrasonic(void){
+unsigned int Echo = 0;
+unsigned int Distance = 0;
+TMR1H=0;
+TMR1L=0;
+PORTB=PORTB|0X20;
+usDelay(10);
+PORTB=PORTB&0XDF;
+while(!(PORTB&0X40));
+T1CON = T1CON | 0X01;
+while(PORTB&0X40);
+T1CON = T1CON & 0xFE;
+Echo = (TMR1L | (TMR1H<<8));
+Distance = Echo/58.82;
+
+
+if(Distance <= 35)
+ {
+ Rotation90();
+ msDelay(1000);
+
+ }
+else
+ {
+ Rotation0();
+ msDelay(1000);
+
+ }
+}
+
+
+
+void delay_us(unsigned int ms){
+unsigned int i;
+while(ms--){
+for(i=0;i<12;i++) {
+asm nop;
+}
+}
+}
+
+void delay_ms(unsigned int ms){
+unsigned int i;
+while(ms--){
+for(i=0;i<238;i++) {
+delay_us(1000) ;
+}
+}
+}
+
+
+void Rotation90()
+{
+
+ unsigned int i;
+ for (i = 0; i < 50; i++)
+ {
+ PORTA = PORTA | 0x04;
+ delay_us(1600);
+ PORTA = PORTA & 0xFB;
+ delay_ms(24);
+ }
+}
+
+void Rotation0()
+{
+ unsigned int i;
+ for (i = 0; i < 50; i++)
+ {
+ PORTA = PORTA | 0x04;
+ delay_us (600);
+ PORTA = PORTA & 0xFB;
+ delay_ms(24);
+ }
+}
