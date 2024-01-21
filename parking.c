@@ -112,9 +112,9 @@ void ADC_init(void){
 
 unsigned int read_temp(void){
  unsigned int read;
- ADCON0 = ADCON0 | 0x04;
- while( ADCON0 & 0x04);
- read=(ADRESH<<8)| ADRESL;
+ ADCON0 = ADCON0 | 0x04;//Set bit 2 of ADCON0 to start the ADC conversion
+ while( ADCON0 & 0x04);//Wait for the ADC conversion to complete
+ read=(ADRESH<<8)| ADRESL;//Combine the high and low bytes for [ ADC ]
  return (read*500)/1023;
 }
 
